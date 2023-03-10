@@ -1,4 +1,5 @@
 include("growth_function.jl")
+include("regions.jl")
 
 function __init__()
   global C = CalciumField()
@@ -22,14 +23,6 @@ function find_boundary_lines(tes::Vector{Tuple{A, A}}, index) where A
     return (endpoints, modifiers)
 end
 
-"""This class represents 2-dimmensional domains"""
-struct OpenRectangle{A}
-    higher_right_corner::Tuple{A,A}
-    lower_left_corner::Tuple{A,A}
-    growth_f::Tuple{ Vector{Int64}, Vector{Int64}, Vector{Int64}}
-end
-
-
 function describe(self::OpenRectangle, v1, v2)
     p2 = ((self.higher_right_corner[1], self.lower_left_corner[2]))
     p4 = ((self.lower_left_corner[1], self.higher_right_corner[2]))
@@ -40,20 +33,8 @@ function get_polynomials(self)
         return(self.growth_f[1].polynomials_coefficients, self.growth_f[2].polynomials_coefficients, self.growth_f[3].polynomials_coefficients)
 end
 
-mutable struct OpenLine{A}
-        start::Tuple{A,A}
-        end_point::Tuple{A,A}
-        growth_f::Tuple{ Vector{Int64}, Vector{Int64}, Vector{Int64}}
-end
-
 function describe(self::OpenLine, v1, v2)
     println("Line ", self.start, self.end_point)
-end
-
-mutable struct SpecialPoint{A}
-    """This class represent 0-dimmensional domains"""
-    point::Tuple{A,A}
-    growth_f::Tuple{ Vector{Int64}, Vector{Int64}, Vector{Int64}}
 end
 
 function describe(self::SpecialPoint, v1, v2)
@@ -331,6 +312,15 @@ function add_regions(x_iter, y_iter, lines, found_rectangles, counter, x_endpoin
     lines[counter * 2] = OpenLine((x_endpoints[1][x_iter], y_endpoints[1][y_iter] ), (x_endpoints[1][x_iter], next_y), verical_line_funs)
 end
 
+""" Constract domains and insert into corresponfing arrays"""
+function add_regions_0d(x_iter, y_iter, lines, found_rectangles, counter, x_endpoints, y_endpoints, rect_funs, horisontal_line_funs, verical_line_funs)
+    next_x = (x_iter == length(x_endpoints[1])) ? x_endpoints[1][1] + 1 : x_endpoints[1][x_iter + 1]
+    next_y = (y_iter == length(y_endpoints[1])) ? y_endpoints[1][1] + 1 : y_endpoints[1][y_iter + 1]
+    found_rectangles[counter] = OpenRectanglePrimitive((x_endpoints[1][x_iter], y_endpoints[1][y_iter]), (next_x, next_y), rect_funs)
+    lines[counter * 2 - 1] = OpenLinePrimitive((x_endpoints[1][x_iter], y_endpoints[1][y_iter]), (next_x, y_endpoints[1][y_iter]), horisontal_line_funs)
+    lines[counter * 2] = OpenLinePrimitive((x_endpoints[1][x_iter], y_endpoints[1][y_iter] ), (x_endpoints[1][x_iter], next_y), verical_line_funs)
+end
+
 function find_regions(vertices::Vector{Tuple{A,A}}, ts_edges::Vector{Tuple{Tuple{A,A}, Tuple{A,A}}},
         ts_faces ,symmetric_growth::Bool=true, full_plot::Bool=false) where A
     """Find regions within which growth functions are identical."""
@@ -415,3 +405,59 @@ function find_regions(vertices::Vector{Tuple{A,A}}, ts_edges::Vector{Tuple{Tuple
     return [found_rectangles, lines, points]
 end
 
+function find_regions(vertices::Vector{Tuple{A,A}},symmetric_growth::Bool=true, full_plot::Bool=false) where A
+    """Find regions within which growth functions are identical."""
+    x_endpoints = find_boundary_lines(vertices, 1)
+    y_endpoints = find_boundary_lines(vertices, 2)
+    # Const values
+    number_of_vertices = length(vertices)
+    x_len = length(x_endpoints[1])
+    y_len = length(y_endpoints[1])
+    # Assign integers to coordinates to eliminate operations on rational/real numbers
+    x_dict = Dict((x_endpoints[1][i], i) for i in 1:length(x_endpoints[1]))
+    y_dict = Dict((y_endpoints[1][i], i) for i in 1:length(y_endpoints[1]))
+    # Buffers for regions
+    found_rectangles = Vector{OpenRectangle}(undef, x_len * y_len)
+    points = Vector{SpecialPoint}(undef, x_len * y_len)
+    lines = Vector{OpenLine}(undef, 2 * x_len * y_len)
+
+    counter = 1
+    for y_iter in 1:y_len
+        for x_iter in 1:x_len
+            if x_iter != 1
+                # Set next points
+                """Calculate polynomials for 0-dimmensional region based on polynomials for corresponding point on left"""
+                new_poly_points = [number_of_vertices, y_endpoints[2][y_iter], x_endpoints[2][x_iter], 0]
+            else
+                if y_iter != 1
+                    """Calculate polynomials for 0-dimmensional region based on polynomials for corresponding point 1 row below"""
+                    new_poly_points = [number_of_vertices, y_endpoints[2][y_iter], x_endpoints[2][x_iter], 0]
+                else
+                    """Calculate polynomials for first 0-dimmensional region """
+                    new_poly_points = [number_of_vertices, y_endpoints[2][y_iter], x_endpoints[2][x_iter], 0]
+                end
+            end
+            points[counter] = SpecialPoint((x_endpoints[1][x_iter], y_endpoints[1][y_iter]), (new_poly_points, new_poly_edge, new_poly_faces))
+            """Start finding growth functions for adjacent regions """
+            # Vertices polynomials
+            poly_points_horisontal_line = [number_of_vertices, y_endpoints[2][y_iter], 0, 0]
+            poly_points_vertical_line = [number_of_vertices, 0, x_endpoints[2][x_iter], 0]
+            poly_points_rect = [number_of_vertices, 0, 0, 0]
+            """ Based on growth functions in 0-dimmensional region find polynomials for adjacent regions (verical and horsiontal line starting in this point
+            and rectangle for which the point is lower-left corner)"""
+            # Construct regions and assign found growth functions
+            add_regions_0d(x_iter, y_iter, lines, found_rectangles, counter, x_endpoints, y_endpoints,
+                poly_points_rect,
+                poly_points_horisontal_line,
+                poly_points_vertical_line)
+            counter += 1
+        end
+    end
+
+    # Add corner modifier to vertice polynomials (0d regions only). (If frames starts at vertice we need to add +1 to point polynomial)
+    for v in vertices
+        points[x_dict[v[1]] + (y_dict[v[2]] - 1) * y_len].growth_f[1][4] = 1
+    end
+
+    return [found_rectangles, lines, points]
+end
