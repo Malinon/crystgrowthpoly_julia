@@ -5,5 +5,6 @@ This is Julia (so better) implementaion of crystgrowthpoly library. It is focuse
 In your julia script/REPL/notebook type
 ```julia
 import Pkg
-Pkg.activate("./crystgrowthpoly")
+Pkg.activate("./crystgrowthpoly_julia")
 ```
+Change path to repository if needed.
