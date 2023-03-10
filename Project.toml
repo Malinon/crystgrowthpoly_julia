@@ -1,0 +1,12 @@
+name = "crystgrowthpoly"
+uuid = "95a4ddee-a6d2-45a1-a8c5-a76c19dcc696"
+authors = ["Jakub <jakmal7@st.amu.edu.pl>"]
+version = "0.1.0"
+
+[deps]
+IterTools = "c8e1da08-722c-5040-9ed9-7db0dc04731e"
+Nemo = "2edaba10-b0f1-5616-af89-8c11ac63239a"
+Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+ProfileVega = "4391764f-db79-4bd7-a4c6-f9062de4300e"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+Traceur = "37b6cedf-1f77-55f8-9503-c64b63398394"
