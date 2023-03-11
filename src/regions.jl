@@ -35,3 +35,17 @@ mutable struct SpecialPointPrimitive{A}
     point::Tuple{A,A}
     growth_f::Vector{Int64}
 end
+
+const SEPERATOR = ";"
+
+function to_string(rect::OpenRectanglePrimitive{A}) where A
+    return string(rect.higher_right_corner) * SEPERATOR * string(rect.lower_left_corner) * SEPERATOR  * string(rect.growth_f)
+end
+
+function to_string(line::OpenLinePrimitive{A}) where A
+    return string(line.start) * SEPERATOR * string(line.end_point) * SEPERATOR  * string(line.growth_f)
+end
+
+function to_string(point::SpecialPointPrimitive{A}) where A
+    return string(point.point) * SEPERATOR * string(point.growth_f)
+end

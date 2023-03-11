@@ -417,27 +417,15 @@ function find_regions(vertices::Vector{Tuple{A,A}},symmetric_growth::Bool=true, 
     x_dict = Dict((x_endpoints[1][i], i) for i in 1:length(x_endpoints[1]))
     y_dict = Dict((y_endpoints[1][i], i) for i in 1:length(y_endpoints[1]))
     # Buffers for regions
-    found_rectangles = Vector{OpenRectangle}(undef, x_len * y_len)
-    points = Vector{SpecialPoint}(undef, x_len * y_len)
-    lines = Vector{OpenLine}(undef, 2 * x_len * y_len)
+    found_rectangles = Vector{OpenRectanglePrimitive}(undef, x_len * y_len)
+    points = Vector{SpecialPointPrimitive}(undef, x_len * y_len)
+    lines = Vector{OpenLinePrimitive}(undef, 2 * x_len * y_len)
 
     counter = 1
     for y_iter in 1:y_len
         for x_iter in 1:x_len
-            if x_iter != 1
-                # Set next points
-                """Calculate polynomials for 0-dimmensional region based on polynomials for corresponding point on left"""
-                new_poly_points = [number_of_vertices, y_endpoints[2][y_iter], x_endpoints[2][x_iter], 0]
-            else
-                if y_iter != 1
-                    """Calculate polynomials for 0-dimmensional region based on polynomials for corresponding point 1 row below"""
-                    new_poly_points = [number_of_vertices, y_endpoints[2][y_iter], x_endpoints[2][x_iter], 0]
-                else
-                    """Calculate polynomials for first 0-dimmensional region """
-                    new_poly_points = [number_of_vertices, y_endpoints[2][y_iter], x_endpoints[2][x_iter], 0]
-                end
-            end
-            points[counter] = SpecialPoint((x_endpoints[1][x_iter], y_endpoints[1][y_iter]), (new_poly_points, new_poly_edge, new_poly_faces))
+            new_poly_points = [number_of_vertices, y_endpoints[2][y_iter], x_endpoints[2][x_iter], 0]
+            points[counter] = SpecialPointPrimitive((x_endpoints[1][x_iter], y_endpoints[1][y_iter]), new_poly_points)
             """Start finding growth functions for adjacent regions """
             # Vertices polynomials
             poly_points_horisontal_line = [number_of_vertices, y_endpoints[2][y_iter], 0, 0]
@@ -456,8 +444,30 @@ function find_regions(vertices::Vector{Tuple{A,A}},symmetric_growth::Bool=true, 
 
     # Add corner modifier to vertice polynomials (0d regions only). (If frames starts at vertice we need to add +1 to point polynomial)
     for v in vertices
-        points[x_dict[v[1]] + (y_dict[v[2]] - 1) * y_len].growth_f[1][4] = 1
+        points[x_dict[v[1]] + (y_dict[v[2]] - 1) * y_len].growth_f[4] = 1
     end
 
     return [found_rectangles, lines, points]
+end
+
+function save_primitive_diagram(file_name, rectangles, lines, points)
+    open(file_name, "w") do file
+        write(file, "h-r corner;l-l corner;growth function\n")
+        for rect in rectangles
+            write(file, to_string(rect))
+            write(file, "\n")
+        end
+        write(file, "\n")
+        write(file, "start;end;growth function\n")
+        for l in lines
+            write(file, to_string(l))
+            write(file, "\n")
+        end
+        write(file, "\n")
+        write(file, "point;growth function\n")
+        for p in points
+            write(file, to_string(p))
+            write(file, "\n")
+        end
+    end
 end
