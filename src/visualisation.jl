@@ -307,7 +307,7 @@ end
 function add_regions(x_iter, y_iter, lines, found_rectangles, counter, x_endpoints, y_endpoints, rect_funs, horisontal_line_funs, verical_line_funs)
     next_x = (x_iter == length(x_endpoints[1])) ? x_endpoints[1][1] + 1 : x_endpoints[1][x_iter + 1]
     next_y = (y_iter == length(y_endpoints[1])) ? y_endpoints[1][1] + 1 : y_endpoints[1][y_iter + 1]
-    found_rectangles[counter] = OpenRectangle((x_endpoints[1][x_iter], y_endpoints[1][y_iter]), (next_x, next_y), rect_funs)
+    found_rectangles[counter] = OpenRectangle((next_x, next_y), (x_endpoints[1][x_iter], y_endpoints[1][y_iter]), rect_funs)
     lines[counter * 2 - 1] = OpenLine((x_endpoints[1][x_iter], y_endpoints[1][y_iter]), (next_x, y_endpoints[1][y_iter]), horisontal_line_funs)
     lines[counter * 2] = OpenLine((x_endpoints[1][x_iter], y_endpoints[1][y_iter] ), (x_endpoints[1][x_iter], next_y), verical_line_funs)
 end
@@ -316,7 +316,7 @@ end
 function add_regions_0d(x_iter, y_iter, lines, found_rectangles, counter, x_endpoints, y_endpoints, rect_funs, horisontal_line_funs, verical_line_funs)
     next_x = (x_iter == length(x_endpoints[1])) ? x_endpoints[1][1] + 1 : x_endpoints[1][x_iter + 1]
     next_y = (y_iter == length(y_endpoints[1])) ? y_endpoints[1][1] + 1 : y_endpoints[1][y_iter + 1]
-    found_rectangles[counter] = OpenRectanglePrimitive((x_endpoints[1][x_iter], y_endpoints[1][y_iter]), (next_x, next_y), rect_funs)
+    found_rectangles[counter] = OpenRectanglePrimitive((next_x, next_y), (x_endpoints[1][x_iter], y_endpoints[1][y_iter]), rect_funs)
     lines[counter * 2 - 1] = OpenLinePrimitive((x_endpoints[1][x_iter], y_endpoints[1][y_iter]), (next_x, y_endpoints[1][y_iter]), horisontal_line_funs)
     lines[counter * 2] = OpenLinePrimitive((x_endpoints[1][x_iter], y_endpoints[1][y_iter] ), (x_endpoints[1][x_iter], next_y), verical_line_funs)
 end
