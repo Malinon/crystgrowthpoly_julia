@@ -2,6 +2,7 @@ using Nemo
 include("tessellation.jl")
 include("visualisation.jl")
 include("preprocessor.jl")
+include("generelize.jl")
 # TODO: Choose better type for A
 
 
