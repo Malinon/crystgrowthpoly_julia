@@ -4,7 +4,7 @@ This package is dedicated to growth functions. It is focused on fast generation 
 # Features
 - Finding topological growth functions,
 - Finding crystallographic frowth functions,
-- Generation and visualisation of orphic diagrams.
+- Finding regions within which growth functions are identical (orphic diagram generation)
 
 # Installation
 In your julia script/REPL/notebook type
@@ -13,3 +13,8 @@ import Pkg
 Pkg.activate("./crystgrowthpoly_julia")
 ```
 Change path to repository if needed.
+
+# Contact
+
+If you have any questions regarding the package, comments or found error, please contact me.   
+E-mail: jakub.malinowski@pwr.edu.pl
