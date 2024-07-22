@@ -1,5 +1,10 @@
 # crystgrowthpoly_julia
-This is Julia (so better) implementaion of crystgrowthpoly library. It is focused on fast generation of orphic diagrams.
+This package is dedicated to growth functions. It is focused on fast generation of orphic diagrams.
+
+# Features
+- Finding topological growth functions,
+- Finding crystallographic frowth functions,
+- Generation and visualisation of orphic diagrams.
 
 # Installation
 In your julia script/REPL/notebook type
