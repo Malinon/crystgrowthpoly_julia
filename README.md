@@ -10,7 +10,7 @@ This package is dedicated to growth functions. It is focused on fast generation 
 In your julia script/REPL/notebook type
 ```julia
 import Pkg
-Pkg.develop("./crystgrowthpoly_julia")
+Pkg.develop(path="./crystgrowthpoly_julia")
 ```
 Change path to repository if needed.
 
