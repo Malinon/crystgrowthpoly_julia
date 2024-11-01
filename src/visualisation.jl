@@ -326,6 +326,8 @@ function find_regions(vertices::Vector{Tuple{A,A}}, ts_edges::Vector{Tuple{Tuple
     """Find regions within which growth functions are identical."""
     x_endpoints = find_boundary_lines(vertices, 1)
     y_endpoints = find_boundary_lines(vertices, 2)
+    println(x_endpoints)
+    println(y_endpoints)
 
     # Const values
     number_of_vertices = length(vertices)
