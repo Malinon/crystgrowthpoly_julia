@@ -1,5 +1,3 @@
-include("private.jl")
-
 """
     struct Tessellation
 

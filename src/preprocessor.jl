@@ -1,3 +1,5 @@
+module cryst_preprocessor
+
 function string_coord_to_coord(s)
     if occursin("/", s)
         # Rational
@@ -17,3 +19,5 @@ end
 function ids_to_faces(verts, ids)
     return Tuple(verts[parse(Int64, id)] for id in ids)
 end
+
+end # module cryst_preprocessor

@@ -1,10 +1,6 @@
 using Nemo
 include("tessellation.jl")
 include("visualisation.jl")
-include("preprocessor.jl")
-include("generelize.jl")
-# TODO: Choose better type for A
-
 
 function get_topological_growth_polynomials(cells::AbstractVector, translation_vectors::AbstractVector, symmetric_growth::Bool=true)
     """Function finding topological growth functions"""
@@ -56,19 +52,19 @@ function read_tessellation_from_file(file_path)
     num_vertices = parse(Int64, (nums_of_cells[1]))
     vertices = Vector{Tuple{fmpq, fmpq}}(undef, num_vertices)
     for i in 1:num_vertices
-        vertices[i] = line_to_point(readline(f))
+        vertices[i] = cryst_preprocessor.line_to_point(readline(f))
     end
     num_edges = parse(Int64, nums_of_cells[2])
     edges = Vector{Tuple{Tuple{fmpq, fmpq}, Tuple{fmpq, fmpq}}}(undef, num_edges)
     for i in 1:num_edges
         vertices_ids = split(readline(f), " ", keepempty=false)
-        edges[i] = ids_to_faces(vertices, vertices_ids)
+        edges[i] = cryst_preprocessor.ids_to_faces(vertices, vertices_ids)
     end
     num_faces = parse(Int64,nums_of_cells[3])
     faces = Vector{Tuple}(undef, num_faces)
     for i in 1:num_faces
         vertices_ids = split(readline(f), " ", keepempty=false)
-        faces[i] = ids_to_faces(vertices, vertices_ids)
+        faces[i] = cryst_preprocessor.ids_to_faces(vertices, vertices_ids)
     end
     close(f)
     return Tessellation(Polygon(vertices, edges, faces))
