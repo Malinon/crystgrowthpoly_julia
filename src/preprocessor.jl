@@ -1,6 +1,9 @@
 using Nemo
 
+a = QQ(2)
+
 module cryst_preprocessor
+
 
 function string_coord_to_coord(s)
     if occursin("/", s)
