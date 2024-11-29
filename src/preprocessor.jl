@@ -1,3 +1,5 @@
+using Nemo
+
 module cryst_preprocessor
 
 function string_coord_to_coord(s)
