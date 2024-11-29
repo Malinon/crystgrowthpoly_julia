@@ -15,8 +15,8 @@ A structure representing a tessellation, which consists of cells defined by vert
     - `faces`: A collection of faces, where each face is represented as a collection of edges.
 """
 struct Tessellation
-    vertices,
-    edges,
+    vertices
+    edges
     faces
     function Tessellation(vertices, edges, faces)
         new_e = [Tuple(sort(collect(elem))) for elem in edges]
