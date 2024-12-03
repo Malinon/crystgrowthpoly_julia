@@ -41,7 +41,6 @@ function get_growth_for_edge(reference_polynomials::Tuple{Vector{Int64}, Vector{
 
     edge_polynomial = calculate_function_for_edge(reference_polynomials[EDGES_POSITION], modifiers_edge, direction, coord_id)
     face_polynomial = calculate_function_for_edge(reference_polynomials[FACES_POSITION], modifiers_face, direction, coord_id)
-    print("Vertice polynomial: ", vertice_polynomial, " ", points_at_line, "\n") 
     return (vertice_polynomial, edge_polynomial, face_polynomial)
 end
 
@@ -70,6 +69,9 @@ function get_growth_for_rectangle(reference_polynomials::Tuple{Vector{Int64}, Ve
     return (vertice_polynomial, edge_polynomial, face_polynomial)
 end
 
+"""
+Computes growth functions based on tessellation in reduced form in crystallograpic/fractional coordinates
+"""
 function create_orphic_diagram(tessellation::Tessellation)
     # Determine boundary lines in orphic diagram and count unique vertices on them
     x_endpoints, x_vert_counts = find_boundary_lines(tessellation.vertices, X)
@@ -89,9 +91,6 @@ function create_orphic_diagram(tessellation::Tessellation)
     # Generating descriptions and modifiers for edges
     modifiers_edge, descriptions_edges = describe_change_points_and_cells(tessellation.edges, lengths, dicts)
     modifiers_face, descriptions_faces = describe_change_points_and_cells(tessellation.faces, lengths, dicts)
-    println("Modifiers faces: ", modifiers_face, "\n")
-    print("Descriptions: X", descriptions_faces[X], "\n")
-    print("Descriptions: Y", descriptions_faces[Y], "\n")
 
     # Buffers for regions
     found_rectangles = Vector{OpenRectangle}(undef, x_len * y_len)

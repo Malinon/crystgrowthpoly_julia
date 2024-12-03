@@ -69,23 +69,13 @@ function calculate_polynomial_in_next_point(reference_polynomial::Vector{Int64},
         modifiers_next::Vector{ModifierChange}, direction::Direction, coord_id::Int64)
     """ Compute growth function for 0-dimensional region based on growth function for adjacent 0-dimensional region"""
     output_polynomial = copy(reference_polynomial)
-    if direction == X && coord_id ==2
-        println("Start: ", output_polynomial)
-    end
 
     for i in 1:length(modifiers_prev)
         if modifiers_prev[i].is_change_temporary
             perpendicular_direction_modifier = get_modifier_at_point(modifiers_prev[i].cell_description, coord_id)
-            if direction == X && coord_id ==2
-                println("Prev - :",perpendicular_direction_modifier, modifiers_prev[i].modifier_change)
-                println(modifiers_prev[i].cell_description)
-            end
             update_polynomial!(output_polynomial, -modifiers_prev[i].modifier_change, perpendicular_direction_modifier, direction)
         elseif !modifiers_prev[i].is_change_immediate
             perpendicular_direction_modifier = get_modifier_at_point(modifiers_prev[i].cell_description, coord_id)
-            if direction == X && coord_id ==2
-                println("Prev + :",perpendicular_direction_modifier, modifiers_prev[i].modifier_change)
-            end
             update_polynomial!(output_polynomial, modifiers_prev[i].modifier_change, perpendicular_direction_modifier, direction)
         end
     end
@@ -93,16 +83,11 @@ function calculate_polynomial_in_next_point(reference_polynomial::Vector{Int64},
     for i in 1:length(modifiers_next)
         if modifiers_next[i].is_change_immediate
             perpendicular_direction_modifier = get_modifier_at_point(modifiers_next[i].cell_description, coord_id)
-            if direction == X && coord_id ==2
-                println("Next + :",perpendicular_direction_modifier, modifiers_prev[i].modifier_change)
-            end
             update_polynomial!(output_polynomial, modifiers_next[i].modifier_change, perpendicular_direction_modifier, direction)
 
         end
     end
-    if direction == X && coord_id ==2
-        println("Stop: ", output_polynomial)
-    end
+
     return output_polynomial
 end
 
@@ -110,19 +95,15 @@ function calculate_function_for_edge(reference_polynomial::Vector{Int64},
     modifiers_prev::Vector{ModifierChange}, direction::Direction, coord_id::Int64)
     """Compute growth functions for 1d/2d region based on adjacent vertice"""
     output_polynomial = copy(reference_polynomial)
-    #println("Case start, ", output_polynomial)
     for i in 1:length(modifiers_prev)
         if modifiers_prev[i].is_change_temporary
             perpendicular_direction_modifier = get_modifier_at_point(modifiers_prev[i].cell_description, coord_id)
-            #println("Prev - :",perpendicular_direction_modifier, modifiers_prev[i].modifier_change)
             update_polynomial!(output_polynomial, -modifiers_prev[i].modifier_change, perpendicular_direction_modifier, direction)
         elseif !modifiers_prev[i].is_change_immediate
             perpendicular_direction_modifier = get_modifier_at_point(modifiers_prev[i].cell_description, coord_id)
-            #println("Prev + :",perpendicular_direction_modifier, modifiers_prev[i].modifier_change)
             update_polynomial!(output_polynomial, modifiers_prev[i].modifier_change, perpendicular_direction_modifier, direction)
         end
     end
-    println("Case end, ", output_polynomial)
     return output_polynomial
 end
 
