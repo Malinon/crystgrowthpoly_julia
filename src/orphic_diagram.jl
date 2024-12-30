@@ -37,7 +37,7 @@ function get_growth_for_edge(reference_polynomials::Tuple{Vector{Int64}, Vector{
     modifiers_face::Vector{ModifierChange}, direction::Direction, coord_id::Int64)
     """Compute growth functions for horizontal edge"""
     vertice_polynomial = [number_of_vertices, 0, 0, 0]
-    vertice_polynomial[1 + direction] = points_at_line
+    vertice_polynomial[direction] = points_at_line
 
     edge_polynomial = calculate_function_for_edge(reference_polynomials[EDGES_POSITION], modifiers_edge, direction, coord_id)
     face_polynomial = calculate_function_for_edge(reference_polynomials[FACES_POSITION], modifiers_face, direction, coord_id)
@@ -145,7 +145,7 @@ function create_orphic_diagram(tessellation::Tessellation)
             next_x = (x_iter == length(x_endpoints)) ? x_endpoints[1] + 1 : x_endpoints[x_iter + 1]
             horizontal_edge_functions = get_growth_for_edge(points[point_counter].growth_f,
                                                             number_of_vertices,
-                                                            x_vert_counts[x_iter],
+                                                            y_vert_counts[y_iter],
                                                             modifiers_edge[X][x_iter],
                                                             modifiers_face[X][x_iter],
                                                             X,
@@ -158,7 +158,7 @@ function create_orphic_diagram(tessellation::Tessellation)
             next_y = (y_iter == length(y_endpoints)) ? y_endpoints[1] + 1 : y_endpoints[y_iter + 1]
             vertical_edge_functions = get_growth_for_edge(points[point_counter].growth_f,
                                                           number_of_vertices,
-                                                          y_vert_counts[y_iter],
+                                                          x_vert_counts[x_iter],
                                                           modifiers_edge[Y][y_iter],
                                                           modifiers_face[Y][y_iter],
                                                           Y,
