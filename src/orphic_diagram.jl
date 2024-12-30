@@ -37,7 +37,7 @@ function get_growth_for_edge(reference_polynomials::Tuple{Vector{Int64}, Vector{
     modifiers_face::Vector{ModifierChange}, direction::Direction, coord_id::Int64)
     """Compute growth functions for horizontal edge"""
     vertice_polynomial = [number_of_vertices, 0, 0, 0]
-    vertice_polynomial[direction] = points_at_line
+    vertice_polynomial[direction + 1] = points_at_line
 
     edge_polynomial = calculate_function_for_edge(reference_polynomials[EDGES_POSITION], modifiers_edge, direction, coord_id)
     face_polynomial = calculate_function_for_edge(reference_polynomials[FACES_POSITION], modifiers_face, direction, coord_id)
