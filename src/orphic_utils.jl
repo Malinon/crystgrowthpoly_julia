@@ -35,11 +35,11 @@ end
 
 function get_modifier_in_domain(description::CellDescription, coord_id::Int64)
     modifier = description.length_in_directions
-    if description.min_coordinate_id < coord_id
+    if description.min_coordinate_id <= coord_id
         modifier = modifier + 1
     end
 
-    if description.max_coordinate_id < coord_id
+    if description.max_coordinate_id <= coord_id
         modifier = modifier - 1
     end
     return modifier
