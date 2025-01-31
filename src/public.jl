@@ -1,9 +1,8 @@
 using Nemo
+include("private.jl")
 include("tessellation.jl")
-include("visualisation.jl")
+include("orphic_diagram.jl")
 include("preprocessor.jl")
-include("generelize.jl")
-# TODO: Choose better type for A
 
 
 function get_topological_growth_polynomials(cells::AbstractVector, translation_vectors::AbstractVector, symmetric_growth::Bool=true)
@@ -71,7 +70,5 @@ function read_tessellation_from_file(file_path)
         faces[i] = ids_to_faces(vertices, vertices_ids)
     end
     close(f)
-    return Tessellation(Polygon(vertices, edges, faces))
+    return Tessellation(vertices, edges, faces)
 end
-
-

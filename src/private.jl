@@ -1,4 +1,5 @@
 module cryst_private
+
 using Nemo
 import IterTools
 
@@ -8,8 +9,6 @@ end
 
 ## @param face Cell to translate
 ## @param vec Translation vector
-
-
 function translate_face(face, vec)
     return Tuple(translate_vector(face[i], vec) for i in 1:length(face))
 end
@@ -22,22 +21,6 @@ function add_cells(cells_in_tessellation, cells, vec, move_operator)
     """Translate and add cells to tessellation model"""
     for c in cells
         push!(cells_in_tessellation, move_operator(c, vec))
-    end
-end
-
-
-## @param cells_in_tessellation Cells, which already are in tessellation
-## @param cells All repeating figure's cells of some dimmension
-## @param vec Translation vector
-## @param move_operator Function translating given cell by vec
-## @param censor  Bool function returning True if cell should be counted, False otherwise
-function add_cells_censored(cells_in_tessellation, cells, vec, move_operator, censor)
-    """Add cells to tessellation model and count number of new cells which satisfy given condition"""
-    for c in cells
-        cell = move_operator(c, vec)
-        if censor(cell)
-            push!(cells_in_tessellation, cell)
-        end
     end
 end
 
@@ -57,53 +40,6 @@ end
 function subtract_vectors(minuend, subtrahend)
     """Return difference of two vectors"""
     return Tuple(z[1] - z[2] for z in zip(minuend, subtrahend))
-end
-
-
-## @param cell Tuple representing cell
-## @returns Sorted tuple representing input cell !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-function sort_points_in_cell(cell)
-    """Sorts points representing cell"""
-    function is_grater_then(tup1, tup2)
-        for i in 1:len(tup1)
-            if tup1[i] > tup2[i]
-                return true
-            end
-        end
-        return false
-    end
-    cell_to_list = list(cell)
-    cell_to_list.sort()
-    return Tuple(cell_to_list)
-end
-
-
-## @param n Length of rectangle's side before scaling (In crystallographical coordinates parallelogram frames used by us are rectangles)
-## @param m Lenght of rectangle's side before scaling (In crystallographical coordinates parallelogram frames used by us are rectangles)
-## @param scale_v1 Scaling value
-## @param scale_v2 Scaling value
-## @param x0 Anchor point of parallelogram frame
-function gen_is_point_in_parallelogram(n::Int, m::Int, scale_v1, scale_v2, x0)
-    """Returns function checking if point is inside parallelogram"""
-    limiter_n = n * scale_v1
-    limiter_m = m * scale_v2
-    function is_point_in_parallelogram(point)
-        vec  = subtract_vectors(point, x0)
-        return  (0 <= vec[1] && 0 <= vec[2] && vec[1] <= limiter_n && vec[2] <= limiter_m)
-    end
-    return  is_point_in_parallelogram
-end
-
-
-## @param n Length of rectangle's side before scaling (In crystallographical coordinates parallelogram frames used by us are rectangles)
-## @param m Lenght of rectangle's side before scaling (In crystallographical coordinates parallelogram frames used by us are rectangles)
-## @param scale_v1 Scaling value
-## @param scale_v2 Scaling value
-## @param x0 Anchor point of parallelogram frame !!!!!!!!!Capture
-function gen_is_face_in_parallelogram(n::Int, m::Int, scale_v1, scale_v2, x0)
-    """Returns function checking if cell (with dimmension higher then 1) is inside parallelogram"""
-    is_point_in_parallelogram = gen_is_point_in_parallelogram(n, m, scale_v1, scale_v2, x0)
-    return (face -> all(is_point_in_parallelogram(point) for point in face))
 end
 
 function generate_matrix(args, symmetric_growth)
@@ -152,77 +88,6 @@ function get_k_cells_num(arguments, cells, translation_vectors, k)
         add_cells(cells_in_tessellation, cells, multiply_by_scalar_and_add(translation_vectors, translations_numbers), move_operator)
     end
     return length(cells_in_tessellation)
-end
-
-## @param n Number of translations in v1 direction
-## @param m Number of translations in v2 direction
-## @param cells List of k-cells in repeating unit
-## @param v1  Translation vector
-## @param v2  Translation vector
-## @param k Dimmension of cell
-## @param x0 Anchor point of parallelogram frame
-## @param scale_v1 Scaling value for vector v1
-## @param scale_v2 Scaling value for vector v2
-## @param additional_limits numbers of additional translations that need to be performed
-## @return Number of k-cells inside parallelogram
-function get_k_cells_num_parallelogram(n::Int, m::Int, cells, v1, v2, k, x0, scale_v1, scale_v2, additional_limits)
-    """Function calculating number of cells with given dimmension inside parallelogram"""
-    cells_in_tessellation = Set()
-    if k == 0
-        # Count 0 cells
-        censor = gen_is_point_in_parallelogram(n, m, scale_v1, scale_v2, x0)
-        move_operator = translate_vector
-    else
-        # Count higher dimmension cells
-        censor = gen_is_face_in_parallelogram(n, m, scale_v1, scale_v2, x0)
-        move_operator = translate_face
-    end
-    for i in -additional_limits[1][1]:((1 + n + additional_limits[1][2]) * ceil(scale_v1))
-        for j in -additional_limits[2][1] : ((1 + m + additional_limits[2][2]) * ceil(scale_v2))
-            add_cells_censored(cells_in_tessellation, cells, multiply_by_scalar_and_add([v1, v2], [i, j]), move_operator, censor)
-        end
-    end
-    return length(cells_in_tessellation)
- end
-
-function my_numerator(x::ca)
-    return numerator(QQ(x))
-end
-
-function my_numerator(x)
-    return numerator(x)
-end
-## @param x0 Anchor point of the frame
-## @param points Vertices in repeating motif
-function get_limits_extenders(x0, points)
-    """This function calculate how many additional translations are needed to be performed."""
-    max_v1 = 0
-    min_v1 = 0
-    max_v2 = 0
-    min_v2 = 0
-    # Find extreme coordinates of repeating unit
-    for p in points
-        if p[1] - x0[1] > max_v1
-            max_v1 = p[1] - x0[1]
-        elseif p[1] - x0[1] < min_v1
-            min_v1 = p[1] - x0[1]
-            if floor(min_v1) == min_v1
-                min_v1 = min_v1 -1
-            end
-        end
-        if p[2] - x0[2] > max_v2
-            max_v2 = p[2] - x0[2]
-        elseif p[2] - x0[2] < min_v2
-            min_v2 = p[2] - x0[2]
-            if floor(min_v2) == min_v2
-                min_v2 = min_v2 - 1
-            end
-        end
-    end
-
-    #if fits(Int64, numerator(floor(max_v1))) && fits(Int64, numerator(-floor(min_v1))) && fits(Int64, numerator(floor(max_v2))) && fits(Int64, numerator(-floor(min_v2)))
-    return ((Int64(my_numerator(floor(max_v1))), Int64(my_numerator(-floor(min_v1)))), (Int64(my_numerator(floor(max_v2))), Int64(my_numerator(-floor(min_v2)))))
-    # TODO: ADD Exception
 end
 
 ## @param coefficient_lists List of lists containing polynomials' coefficients
@@ -301,40 +166,65 @@ function get_min_max(lis, index)
     return (min_val, max_val)
 end
 
+function mantisse(x)
+    return x - floor(x)
+end
 
-function get_faces_polynomial(edges, x0, symmetric_growth::Bool=false)
-    coefficients = Any[0,0,0,0]
-    edgy_k_counter = 0::Int
-    edgy_l_counter = 0::Int
-    edgy_both_counter = 0::Int
-    for e in edges
-        face_in_new_system = translate_face(e, (-x0[1], -x0[2]))
-        minmax_k = get_min_max(face_in_new_system, 1)
-        minmax_l = get_min_max(face_in_new_system, 2)
+# 
+# Function: get_modifier_for_cell
+# 
+# Description:
+# This function calculates a modifier for a given cell based on its coordinates and a specified direction. 
+# Impact of cell is equal I_(cell) = PRODUCT (n - modifier)
+# 
+# Parameters:
+# - cell: The cell for which the modifier is being calculated.
+# - x0_mantisse: A mantissa of selected coordinate of the anchor point
+# - direction: The direction for modifier is calculated
+# 
+# Returns:
+# - modifier: An integer value representing the calculated modifier for the cell.
+function get_modifier_for_cell(cell, x0_mantisse, direction)
+    min_coordinate, max_coordinate = get_min_max(cell, direction)
+    floored_max = floor(max_coordinate)
+    floored_min = floor(min_coordinate)
 
-        floored_max_k = (floor(minmax_k[2]))
-        floored_max_l = (floor(minmax_l[2]))
-        if minmax_k[2] == floored_max_k
-            if minmax_l[2] == floored_max_l
-                edgy_both_counter = edgy_both_counter + 1
-            else
-                edgy_k_counter = edgy_k_counter + 1
-            end
-        elseif minmax_l[2] == floored_max_l
-            edgy_l_counter = edgy_l_counter + 1
-        end
-        mod_k = floored_max_k - (floor(minmax_k[1]))
-        mod_l = floored_max_l - (floor(minmax_l[1]))
-        coefficients[1] = coefficients[1] + 1
-        coefficients[2]  = coefficients[2] + 1 - mod_l
-        coefficients[3]  = coefficients[3] + 1 - mod_k
-        coefficients[4] =  coefficients[3] + 1 - mod_l - mod_k - mod_k * mod_l
+    modifier = floored_max - floored_min
+    if ((max_coordinate - floored_max) <= x0_mantisse)
+        modifier -= 1
     end
-    coefficients[2] = coefficients[2] + edgy_l_counter + edgy_both_counter
-    coefficients[3] = coefficients[3] + edgy_k_counter + edgy_both_counter
-    coefficients[4] = coefficients[4] - edgy_both_counter
+    if ((min_coordinate - floored_min) < x0_mantisse)
+        modifier += 1
+    end
+
+    return modifier
+end
+
+"""
+    get_high_dim_cell_polynomial(cells, x0)
+
+Calculate the coefficients of a polynomial based on the provided cells and initial value `x0`.
+
+# Arguments
+- `cells::Vector`: A vector of cells reprersented by their vertices in cryst. coordinates
+- `x0::Tuple`: Anchor point of frame
+
+# Returns
+- `coefficients::Vector{Any}`: A vector containing the coefficients of the polynomial in the form `[a_1, a_2, a_3, a_4]`, where:
+  - f(k,l) = a_1 * kl + a_2 * k + a_3 * l + a_4
+"""
+function get_high_dim_cell_polynomial(cells, x0)
+    coefficients = Any[0,0,0,0] # Polynomial a_1 * kl + a_2 * k + a_3 * l + a_4 
+    x0_mantisse = mantisse(x0)
+    for cell in cells
+        modifier_k = get_modifier_for_cell(cell, x0_mantisse, 1)
+        modifier_l = get_modifier_for_cell(cell, x0_mantisse, 2)
+        coefficients[4] += modifier_k * modifier_l
+        coefficients[3] -= modifier_k
+        coefficients[2] -= modifier_l
+    end
+    coefficients[1] = len(edges)
     return coefficients
 end
-end
 
-
+end # module cryst_private

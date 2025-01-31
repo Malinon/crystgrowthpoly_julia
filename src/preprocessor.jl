@@ -1,3 +1,5 @@
+using Nemo
+
 function string_coord_to_coord(s)
     if occursin("/", s)
         # Rational
