@@ -5,7 +5,7 @@ using DataFrames
 using DelimitedFiles
 using Nemo
 
-function create_data_frame(rectangles, edges, vertices)
+function create_data_frame(rectangles, edges, vertices, v1 = (1,0), v2 = (0, 1))
     df = DataFrame(Dimmension = Int64[],
     Start_x = Float64[], Start_y = Float64[], End_x = Float64[], End_y = Float64[],
     Growth_function_vertices_0 = Int64[], Growth_function_vertices_1= Int64[], Growth_function_vertices_2=Int64[], Growth_function_vertices_3=Int64[],
@@ -15,11 +15,20 @@ function create_data_frame(rectangles, edges, vertices)
     add_points_to_df!(df, vertices)
     add_edges_to_df!(df, edges)
     add_rectangles_to_df!(df, rectangles)
+    add_vec_columns_to_df!(df, v1, v2)
     return df
 end
 
-function save_df_to_files(out_name, vertices, edges, rectangles)
-    df = create_data_frame(vertices, edges, rectangles)
+function add_vec_columns_to_df!(df, v1, v2)
+    df[!, "v1_x"] = fill(v1[1], nrow(df))
+    df[!, "v1_y"] = fill(v1[2], nrow(df))
+    df[!, "v2_x"] = fill(v2[1], nrow(df))
+    df[!, "v2_y"] = fill(v2[2], nrow(df))
+end
+
+
+function save_df_to_files(out_name, vertices, edges, rectangles, v1, v2)
+    df = create_data_frame(vertices, edges, rectangles, v1, v2)
     open(out_name, "w") do f
         # Step 3: Write the header (column names)
         writedlm(f, [names(df)], ',')
@@ -98,8 +107,8 @@ function get_min_max(lis, index)
     return (min_val, max_val)
 end
 
-tessellation = crystgrowthpoly.read_tessellation_from_file(INPUT_PATH)
-reduced_tessellation = crystgrowthpoly.Tessellation(crystgrowthpoly.reduce_polygon(tessellation.polygon.cells[1], tessellation.polygon.cells[2], tessellation.polygon.cells[3]))
-orphic = crystgrowthpoly.find_regions(reduced_tessellation.polygon.cells[1], reduced_tessellation.polygon.cells[2], reduced_tessellation.polygon.cells[3])
-save_df_to_files(OUTPUT_PATH, orphic[1], orphic[2], orphic[3])
+tessellation, vectors = crystgrowthpoly.read_tessellation_from_file(INPUT_PATH, true)
+reduced_tessellation = crystgrowthpoly.reduce_polygon(tessellation.vertices, tessellation.edges, tessellation.faces)
+orphic = crystgrowthpoly.create_orphic_diagram(reduced_tessellation)
+save_df_to_files(OUTPUT_PATH, orphic.rectangles, orphic.lines, orphic.points, vectors[1], vectors[2])
 
